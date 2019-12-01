@@ -61,7 +61,7 @@ def player_select():
             break
         else:
             print("Invalid choice.")
-    computer = 'O' if valid_choice is 'x' else 'X'
+    computer = 'O' if valid_choice == 'x' else 'X'
     positions = Enum('Player', [('HUMAN', valid_choice.upper()), ('COMPUTER', computer)])
     return positions
 
@@ -73,8 +73,10 @@ if __name__ == '__main__':
     while True:
         current_move = None
         if current_player == Player.COMPUTER:
+            print("Computer turn")
             current_move = think(Player, game_board)
         else:
+            print("Human turn")
             current_move = prompt(current_player, game_board)
         print(current_player, current_move)
         game_board = draw(current_player, current_move, game_board)

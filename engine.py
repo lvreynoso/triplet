@@ -1,5 +1,4 @@
 #!python
-from copy import deepcopy
 
 def status(board):
     """Return the win/draw/indeterminate status of the board"""
@@ -20,24 +19,30 @@ def status(board):
 def minimax(player, players, scores, depth, board):
     victory, winner = status(board)
     if victory:
-        return scores[winner]
+        if winner == players.COMPUTER.value:
+            return scores[winner] - depth
+        if winner == players.HUMAN.value:
+            return scores[winner] + depth
     if player == players.COMPUTER:
         possible_moves = possibilities(board)
-        value = -99
+        default = -99
         for move in possible_moves:
-            child_board = deepcopy(board)
-            child_board[move[0]][move[1]] = players.COMPUTER.value
-            possible_moves[move] = minimax(players.HUMAN, players, scores, depth + 1, child_board)
-        return max(list(possible_moves.values()) + [value])
+            board[move[0]][move[1]] = players.COMPUTER.value
+            possible_moves[move] = minimax(players.HUMAN, players, scores, depth + 1, board)
+            board[move[0]][move[1]] = None
+        possible_moves['default'] = default
+        score = max(list(possible_moves.values()))
+        return score
     if player == players.HUMAN:
         possible_moves = possibilities(board)
-        value = 99
+        default = 99
         for move in possible_moves:
-            child_board = deepcopy(board)
-            child_board[move[0]][move[1]] = players.HUMAN.value
-            possible_moves[move] = minimax(players.COMPUTER, players, scores, depth + 1, child_board)
-        return min(list(possible_moves.values()) + [value])
-    return 0
+            board[move[0]][move[1]] = players.HUMAN.value
+            possible_moves[move] = minimax(players.COMPUTER, players, scores, depth + 1, board)
+            board[move[0]][move[1]] = None
+        possible_moves['default'] = default
+        score = min(list(possible_moves.values()))
+        return score
 
 def possibilities(board):
     possible_moves = {}
@@ -56,10 +61,10 @@ def think(players, board):
     # get possible valid moves
     possible_moves = possibilities(board)
     for move in possible_moves:
-        child_board = deepcopy(board)
-        child_board[move[0]][move[1]] = players.COMPUTER.value
-        possible_moves[move] = minimax(players.COMPUTER, players, scores, 0, child_board)
-    # print(possible_moves)
+        board[move[0]][move[1]] = players.COMPUTER.value
+        possible_moves[move] = minimax(players.COMPUTER, players, scores, 0, board)
+        board[move[0]][move[1]] = None
+    print(possible_moves)
     decision = max(possible_moves, key=possible_moves.get)
     # print(decision)
     return decision
