@@ -1,5 +1,8 @@
 #!python
 
+cols = ['a', 'b', 'c']
+rows = ['0', '1', '2']
+
 def status(board):
     """Return the win/draw/indeterminate status of the board"""
     for player in ['X', 'O']:
@@ -16,6 +19,16 @@ def status(board):
         return (True, None)
     return (False, None)
 
+def view(board):
+    """Return a string based representation of the current board"""
+    blanked_board = map(lambda x: [' ' if sq is None else sq for sq in x], board)
+    print(f'\n   | {cols[0]} | {cols[1]} | {cols[2]} |')
+    print('{:-^16}'.format(''))
+    for index, row_state in enumerate(blanked_board):
+        print(f' {rows[index]} | {row_state[0]} | {row_state[1]} | {row_state[2]} |')
+    print()
+    return
+
 def minimax(player, players, scores, depth, board):
     victory, winner = status(board)
     if victory:
@@ -23,26 +36,18 @@ def minimax(player, players, scores, depth, board):
             return scores[winner] - depth
         if winner == players.HUMAN.value:
             return scores[winner] + depth
-    if player == players.COMPUTER:
-        possible_moves = possibilities(board)
-        default = -99
-        for move in possible_moves:
-            board[move[0]][move[1]] = players.COMPUTER.value
-            possible_moves[move] = minimax(players.HUMAN, players, scores, depth + 1, board)
-            board[move[0]][move[1]] = None
-        possible_moves['default'] = default
-        score = max(list(possible_moves.values()))
-        return score
-    if player == players.HUMAN:
-        possible_moves = possibilities(board)
-        default = 99
-        for move in possible_moves:
-            board[move[0]][move[1]] = players.HUMAN.value
-            possible_moves[move] = minimax(players.COMPUTER, players, scores, depth + 1, board)
-            board[move[0]][move[1]] = None
-        possible_moves['default'] = default
-        score = min(list(possible_moves.values()))
-        return score
+        return scores[winner]
+    possible_moves = possibilities(board)
+    default = 99 if player == players.HUMAN else -99
+    next_player = players.COMPUTER if player == players.HUMAN else players.HUMAN
+    for move in possible_moves:
+        board[move[0]][move[1]] = player.value
+        possible_moves[move] = minimax(next_player, players, scores, depth + 1, board)
+        board[move[0]][move[1]] = None
+    possible_moves['default'] = default
+
+    score = min(possible_moves.values()) if player == players.HUMAN else max(possible_moves.values())
+    return score
 
 def possibilities(board):
     possible_moves = {}
@@ -53,6 +58,8 @@ def possibilities(board):
     return possible_moves
 
 def think(players, board):
+    global examined
+    examined = 0
     scores = {
         players.COMPUTER.value: 99,
         None: 0,
@@ -62,10 +69,11 @@ def think(players, board):
     possible_moves = possibilities(board)
     for move in possible_moves:
         board[move[0]][move[1]] = players.COMPUTER.value
-        possible_moves[move] = minimax(players.COMPUTER, players, scores, 0, board)
+        possible_moves[move] = minimax(players.HUMAN, players, scores, 1, board)
         board[move[0]][move[1]] = None
     print(possible_moves)
     decision = max(possible_moves, key=possible_moves.get)
+    examined = 0
     # print(decision)
     return decision
 
