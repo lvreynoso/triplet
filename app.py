@@ -1,16 +1,13 @@
 #!python
 
-from enum import Enum, unique, auto
+from enum import Enum
+from copy import deepcopy
 
-tt_board = [[None, None, None] for i in range(3)]
+from engine import think, status
+
+blank_board = [[None, None, None] for i in range(3)]
 cols = ['a', 'b', 'c']
 rows = ['0', '1', '2']
-
-Player = Enum('Player', [('HUMAN', 'X'), ('COMPUTER', 'O')])
-
-def think(board):
-    """Examine the board and evaluate and return the best move"""
-    pass
 
 def prompt(player, board):
     """Prompt the player for a move"""
@@ -20,7 +17,7 @@ def prompt(player, board):
         if command in ['exit', 'quit']:
             exit()
         move = validate_move(command, board)
-        if move[0] is True: # is valid, explicit for readibility
+        if move[0] is True: # move is valid, explicit for readibility
             valid_move = move[1]
             break
         else:
@@ -35,14 +32,12 @@ def validate_move(move, board):
     col = 'abc'.find(move[0])
     if board[row][col] is not None:
         return (False, None)
-    return (True, (col, row))
+    return (True, (row, col))
 
 
 def draw(player, move, board):
     """Return an updated tic tac toe board after drawing a move"""
-    # row = int(move[1])
-    # col = 'abc'.find(move[0])
-    board[move[1]][move[0]] = player.value
+    board[move[0]][move[1]] = player.value
     return board
 
 def view(board):
@@ -54,30 +49,37 @@ def view(board):
         print(f' {rows[index]} | {row_state[0]} | {row_state[1]} | {row_state[2]} |')
     return
 
-def status(board):
-    """Return the win/draw/indeterminate status of the board"""
-    for player in ['X', 'O']:
-        row_win = True in map(lambda x: x[0] == x[1] == x[2] == player, board)
-        col_win = True in (board[0][i] == board[1][i] == board[2][i] == player for i in range(3))
-        diag_win_one = board[0][0] == board[1][1] == board[2][2] == player
-        diag_win_two = board[0][2] == board[1][1] == board[2][0] == player
-        if True in (row_win, col_win, diag_win_one, diag_win_two):
-            return (True, player)
-    draw = True
-    for row in board:
-        draw = False if None in row else draw
-    if draw:
-        return (True, None)
-    return (False, None)
+def player_select():
+    """Prompt the player for their choice of X or O"""
+    valid_choice = False
+    while not valid_choice:
+        command = input(f"Would you like to play as X or O? ").strip().lower()
+        if command in ['exit', 'quit']:
+            exit()
+        if command in ['x', 'o']:
+            valid_choice = command
+            break
+        else:
+            print("Invalid choice.")
+    computer = 'O' if valid_choice is 'x' else 'X'
+    positions = Enum('Player', [('HUMAN', valid_choice.upper()), ('COMPUTER', computer)])
+    return positions
 
 if __name__ == '__main__':
-    view(tt_board)
-    current_player = Player.HUMAN
+    game_board = deepcopy(blank_board)
+    Player = player_select()
+    view(game_board)
+    current_player = Player('X')
     while True:
-        current_move = prompt(current_player, tt_board)
-        tt_board = draw(current_player, current_move, tt_board)
-        view(tt_board)
-        victory, winner = status(tt_board)
+        current_move = None
+        if current_player == Player.COMPUTER:
+            current_move = think(Player, game_board)
+        else:
+            current_move = prompt(current_player, game_board)
+        print(current_player, current_move)
+        game_board = draw(current_player, current_move, game_board)
+        view(game_board)
+        victory, winner = status(game_board)
         if victory:
             if winner:
                 print(f'\n{winner} wins!')
