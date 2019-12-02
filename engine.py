@@ -19,19 +19,12 @@ def status(board):
         return (True, None)
     return (False, None)
 
-def view(board):
-    """Return a string based representation of the current board"""
-    blanked_board = map(lambda x: [' ' if sq is None else sq for sq in x], board)
-    print(f'\n   | {cols[0]} | {cols[1]} | {cols[2]} |')
-    print('{:-^16}'.format(''))
-    for index, row_state in enumerate(blanked_board):
-        print(f' {rows[index]} | {row_state[0]} | {row_state[1]} | {row_state[2]} |')
-    print()
-    return
-
 def minimax(player, players, scores, depth, board):
+    """minimax algorithm to navigate the game decision tree"""
     victory, winner = status(board)
     if victory:
+        # scores adjusted for depth to value earlier wins
+        # and avoid earlier losses
         if winner == players.COMPUTER.value:
             return scores[winner] - depth
         if winner == players.HUMAN.value:
@@ -58,8 +51,8 @@ def possibilities(board):
     return possible_moves
 
 def think(players, board):
-    global examined
-    examined = 0
+    # weights for victory, draw, and loss
+    # used in minimax function
     scores = {
         players.COMPUTER.value: 99,
         None: 0,
@@ -71,9 +64,6 @@ def think(players, board):
         board[move[0]][move[1]] = players.COMPUTER.value
         possible_moves[move] = minimax(players.HUMAN, players, scores, 1, board)
         board[move[0]][move[1]] = None
-    print(possible_moves)
     decision = max(possible_moves, key=possible_moves.get)
-    examined = 0
-    # print(decision)
     return decision
 

@@ -28,6 +28,7 @@ def validate_move(move, board):
     """Check if a move is valid"""
     if move[0] not in cols and move[1] not in rows:
         return (False, None)
+    # transform move to refer to the right index in our list of lists
     row = int(move[1])
     col = 'abc'.find(move[0])
     if board[row][col] is not None:
@@ -78,7 +79,6 @@ if __name__ == '__main__':
         else:
             print("Human turn")
             current_move = prompt(current_player, game_board)
-        print(current_player, current_move)
         game_board = draw(current_player, current_move, game_board)
         view(game_board)
         victory, winner = status(game_board)
