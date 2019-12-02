@@ -66,16 +66,14 @@ def player_select():
     positions = Enum('Player', [('HUMAN', valid_choice.upper()), ('COMPUTER', computer)])
     return positions
 
-if __name__ == '__main__':
-    game_board = deepcopy(blank_board)
-    Player = player_select()
-    view(game_board)
-    current_player = Player('X')
+def main(players, game_board):
+    """Main game loop"""
+    current_player = players('X')
     while True:
         current_move = None
-        if current_player == Player.COMPUTER:
+        if current_player == players.COMPUTER:
             print("Computer turn")
-            current_move = think(Player, game_board)
+            current_move = think(players, game_board)
         else:
             print("Human turn")
             current_move = prompt(current_player, game_board)
@@ -84,8 +82,15 @@ if __name__ == '__main__':
         victory, winner = status(game_board)
         if victory:
             if winner:
-                print(f'\n{winner} wins!')
+                print(f'\n{winner} ({players(winner).name}) wins!')
             else:
                 print(f'\nDraw!')
             break
-        current_player = Player.COMPUTER if current_player == Player.HUMAN else Player.HUMAN
+        current_player = players.COMPUTER if current_player == players.HUMAN else players.HUMAN
+
+if __name__ == '__main__':
+    new_board = deepcopy(blank_board)
+    Player = player_select()
+    view(new_board)
+    main(Player, new_board)
+    

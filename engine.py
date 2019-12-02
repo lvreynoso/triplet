@@ -1,8 +1,5 @@
 #!python
 
-cols = ['a', 'b', 'c']
-rows = ['0', '1', '2']
-
 def status(board):
     """Return the win/draw/indeterminate status of the board"""
     for player in ['X', 'O']:
