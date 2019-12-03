@@ -1,5 +1,9 @@
 #!python
 
+from enum import Enum, auto
+
+State = Enum('State', [('VICTORY', auto()), ('DRAW', auto()), ('ONGOING', auto())])
+
 def status(board):
     """Return the win/draw/indeterminate status of the board"""
     for player in ['X', 'O']:
@@ -8,25 +12,26 @@ def status(board):
         diag_win_one = board[0][0] == board[1][1] == board[2][2] == player
         diag_win_two = board[0][2] == board[1][1] == board[2][0] == player
         if True in (row_win, col_win, diag_win_one, diag_win_two):
-            return (True, player)
+            return (State.VICTORY, player)
     draw = True
     for row in board:
         draw = False if None in row else draw
     if draw:
-        return (True, None)
-    return (False, None)
+        return (State.DRAW, None)
+    return (State.ONGOING, None)
 
 def minimax(player, players, scores, depth, board):
     """minimax algorithm to navigate the game decision tree"""
-    victory, winner = status(board)
-    if victory:
+    gamestate, winner = status(board)
+    if gamestate is State.VICTORY:
         # scores adjusted for depth to value earlier wins
         # and avoid earlier losses
         if winner == players.COMPUTER.value:
             return scores[winner] - depth
         if winner == players.HUMAN.value:
             return scores[winner] + depth
-        return scores[winner]
+    elif gamestate is State.DRAW:
+        return scores[None] # winner is None, value is 0
     possible_moves = possibilities(board)
     default = 99 if player == players.HUMAN else -99
     next_player = players.COMPUTER if player == players.HUMAN else players.HUMAN

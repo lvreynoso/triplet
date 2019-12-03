@@ -3,7 +3,7 @@
 from enum import Enum
 from copy import deepcopy
 
-from engine import think, status
+from engine import think, status, State
 
 blank_board = [[None, None, None] for i in range(3)]
 cols = ['a', 'b', 'c']
@@ -79,12 +79,12 @@ def main(players, game_board):
             current_move = prompt(current_player, game_board)
         game_board = draw(current_player, current_move, game_board)
         view(game_board)
-        victory, winner = status(game_board)
-        if victory:
-            if winner:
-                print(f'\n{winner} ({players(winner).name}) wins!')
-            else:
-                print(f'\nDraw!')
+        gamestate, winner = status(game_board)
+        if gamestate is State.VICTORY:
+            print(f'\n{winner} ({players(winner).name}) wins!')
+            break
+        elif gamestate is State.DRAW:
+            print(f'\nDraw!')
             break
         current_player = players.COMPUTER if current_player == players.HUMAN else players.HUMAN
 
